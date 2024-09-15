@@ -1,0 +1,5 @@
+--------------------------------- Manual de usuario ---------------------------------
+
+1. Ejecutar el programa
+
+2. Como comunicarse con 'NutriTec'
