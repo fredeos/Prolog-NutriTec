@@ -8,10 +8,10 @@ nombre(hombre).
 nombre(mujer).
 nombre(persona).
 
-verbo(come)
-verbo(necesita)
-verbo(huye)
-verbo(tiene)
+verbo(come).
+verbo(necesita).
+verbo(huye).
+verbo(tiene).
 
 
 % ////////// Casos particulares
