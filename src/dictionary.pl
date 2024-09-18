@@ -8,8 +8,20 @@ nombre(manzana, f).
 nombre(casa, f).
 
 % -------------------------------[ Verbos y derivados]-------------------------------
+lista([1,2,3,4]).
+% lista([han,tenido]).
+
+member(X,[X|_]).
+member(X,[_|R]):- member(X,R).
+
+len(0,[]).
+len(N,[_|R]):- len(L,R), N is L+1.
 % >> Verbos
+verboso(V):- verbo(V).
+verboso(VS):- len(L,VS) ,!, L > 0 ,!, member(A,VS), verbo(A).
+
 verbo(V):- conjugado(_,V). % REGLA: verbo(conjugado) = analiza si un verbo es un conjugado de otro
+verbo(haber).
 verbo(comer).   % HECHO: verbo(palabra) = es una palabra conocida
 verbo(estar).
 verbo(tener).
@@ -18,6 +30,8 @@ verbo(tener).
 conjugado(comer, come). % HECHO: conjugado(verbo, palabra) = es una conjugacion conocida de un verbo
 conjugado(estar, esta).
 conjugado(tener, tiene).
+conjugado(tener, tenido).
+conjugado(haber, han).
 
 % >> Auxiliares de verbos
 auxiliar(en). %HECHO: auxiliar(palabra) = es un auxiliar conocido
