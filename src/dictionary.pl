@@ -1,13 +1,13 @@
 % -------------------------------[ Reglas/metodos auxiliares ]-------------------------------
-member(X,[X|_]).
-member(X,[_|R]):- member(X,R).
+miembro(X,[X|_]).
+miembro(X,[_|R]):- miembro(X,R).
 
 len(0,[]).
 len(N,[_|R]):- len(L,R), N is L+1.
 
-reverse(L1,L2):- reverse(L1,[],L2).
-reverse([],L,L).
-reverse([X|R], C, L):- reverse(R,[X|C],L).
+inversa(L1,L2):- inversa(L1,[],L2).
+inversa([],L,L).
+inversa([X|R], C, L):- inversa(R,[X|C],L).
 
 % -------------------------------[ Composicion de oraciones ]-------------------------------
 % >> Sintagmas verbales
@@ -23,7 +23,9 @@ sintagma_nominal([yo]). %HECHO: sintagma_nominal(palabra) = indica una palabra u
 sintagma_nominal([me]).
 
 % >>> Oraciones
-% [Verificar que las palabras usadas sean parte del diccionario conocido]
+% [Validar que una oracion dada sea puede construir con el diccionario conocido]
+% oracion_valida(Oracion): 
+% [Verificar que las palabras usadas en una oracion sean parte del diccionario conocido]
 palabras_validas([X|R]):- determinante(X,_), palabras_validas(R).
 palabras_validas([X|R]):- nombre(X,_), palabras_validas(R).
 palabras_validas([X|R]):- verbo(X), palabras_validas(R).
@@ -31,24 +33,25 @@ palabras_validas([X|R]):- auxiliar(X), palabras_validas(R).
 palabras_validas([X|R]):- sintagma_nominal([X]), palabras_validas(R).
 palabras_validas([]).
 
-% [Descomponer una oracion bien formada en su estructura Sintagmas nominal+Sintagma verbal]
+% [Descomponer una oracion bien formada en su estructura Sintagmas Nominal+Sintagma Verbal]
  % X = (lista) sintagma nominal
  % [Y,Z] = [Y=(lista)verbo + Z=(lista)sintagma nominal]
+ % <=> X1,X2: sintagmas nominales | Y1,Y2: verbos | Z1:Z2: sintagmas nominales
 descomponer(Oracion,X,[Y,Z]):- descomponer(Oracion,[],[],[],X,Y,Z).
-descomponer([N|L],X1,[],[],X2,Y2,Z2):- determinante(N,_), descomponer(L,[N|X1],[],[],X2,Y2,Z2).
-descomponer([N|L],X1,[],[],X2,Y2,Z2):- nombre(N,_), descomponer(L,[N|X1],[],[],X2,Y2,Z2).
+
+descomponer([N|L],X1,[],[],X2,Y2,Z2):- (determinante(N,_) ; nombre(N,_)), descomponer(L,[N|X1],[],[],X2,Y2,Z2).
 descomponer([N|L],_,[],[],X2,Y2,Z2):- sintagma_nominal([N]), descomponer(L,[N],[],[],X2,Y2,Z2).
-
 descomponer([N|L],X1,[],[],X2,Y2,Z2):- verbo(N), descomponer(L,X1,[N],[],X2,Y2,Z2).
-descomponer([N|L],X1,Y1,[],X2,Y2,Z2):- verbo(N), descomponer(L,X1,[N|Y1],[],X2,Y2,Z2).
-descomponer([N|L],X1,Y1,[],X2,Y2,Z2):- determinante(N,_), descomponer(L,X1,Y1,[N],X2,Y2,Z2).
-descomponer([N|L],X1,Y1,[],X2,Y2,Z2):- nombre(N,_), descomponer(L,X1,Y1,[N],X2,Y2,Z2).
+descomponer([N|L],X1,Y1,[],X2,Y2,Z2):- len(H,X1), H > 0, len(K,Y1),
+                                        K > 0, verbo(N), descomponer(L,X1,[N|Y1],[],X2,Y2,Z2).
+descomponer([N|L],X1,Y1,[],X2,Y2,Z2):- len(H,X1), H > 0, len(K,Y1), K > 0, 
+                                        (determinante(N,_) ; nombre(N,_)), descomponer(L,X1,Y1,[N],X2,Y2,Z2).
+descomponer([N|L],X1,Y1,Z1,X2,Y2,Z2):- len(H,X1), H > 0, len(K,Y1), K > 0, len(T,Z1), T > 0, 
+                                        (determinante(N,_) ; nombre(N,_)), descomponer(L,X1,Y1,[N|Z1],X2,Y2,Z2).
+% CASO BASE: la oracion-lista fue totalmente procesada y sintagmas encontrados coinciden con los propuestos
+descomponer([],X1,Y1,Z1,X2,Y2,Z2):- inversa(X1,X2), inversa(Y1,Y2), inversa(Z1,Z2).
 
-descomponer([N|L],X1,Y1,Z1,X2,Y2,Z2):- determinante(N,_), descomponer(L,X1,Y1,[N|Z1],X2,Y2,Z2).
-descomponer([N|L],X1,Y1,Z1,X2,Y2,Z2):- nombre(N,_), descomponer(L,X1,Y1,[N|Z1],X2,Y2,Z2).
-
-descomponer([],X,Y,Z,X,Y,Z). % CASO BASE: la oracion-lista fue totalmente procesada y sintagmas encontrados coinciden con los propuestos
-
+% [Verificar que una oracion dada en sus tres componenetes sea valida]
 oracion(X,Y,Z):- sintagma_nominal(X), sintagma_verbal([Y,Z]).
 
 % -------------------------------[ Determinates ]-------------------------------
