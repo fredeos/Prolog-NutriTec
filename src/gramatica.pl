@@ -1,13 +1,5 @@
-% -------------------------------[ Reglas/metodos auxiliares ]-------------------------------
-miembro(X,[X|_]).
-miembro(X,[_|R]):- miembro(X,R).
-
-len(0,[]).
-len(N,[_|R]):- len(L,R), N is L+1.
-
-inversa(L1,L2):- inversa(L1,[],L2).
-inversa([],L,L).
-inversa([X|R], C, L):- inversa(R,[X|C],L).
+:- module(gramatica, [oracion_valida/1]).
+:- use_module(diccionario).
 
 % -------------------------------[ Composicion de oraciones ]-------------------------------
 % >> Sintagmas verbales
@@ -24,7 +16,8 @@ sintagma_nominal([me]).
 
 % >>> Oraciones
 % [Validar que una oracion dada sea puede construir con el diccionario conocido]
-% oracion_valida(Oracion): 
+oracion_valida(Oracion):- palabras_validas(Oracion), descomponer(Oracion,A,[B,C]), oracion(A,B,C).
+
 % [Verificar que las palabras usadas en una oracion sean parte del diccionario conocido]
 palabras_validas([X|R]):- determinante(X,_), palabras_validas(R).
 palabras_validas([X|R]):- nombre(X,_), palabras_validas(R).
@@ -53,61 +46,3 @@ descomponer([],X1,Y1,Z1,X2,Y2,Z2):- inversa(X1,X2), inversa(Y1,Y2), inversa(Z1,Z
 
 % [Verificar que una oracion dada en sus tres componenetes sea valida]
 oracion(X,Y,Z):- sintagma_nominal(X), sintagma_verbal([Y,Z]).
-
-% -------------------------------[ Determinates ]-------------------------------
-determinante(el, m). % HECHO: determinante(palabra, genero) = es un determinante conocido clasificado por genero
-determinante(la, f).
-determinante(lo, n).
-determinante(los, m).
-determinante(las, f).
-
-% -------------------------------[ Nombres o sujetos ]-------------------------------
-nombre(hombre, m). % HECHO: nombre(palabra, genero) = es un nombre conocido clasificado por genero
-nombre(manzana, f).
-nombre(casa, f).
-nombre(doctor, m).
-
-% -------------------------------[ Respuestas sencillas ]-------------------------------
-respuesta(si).
-respuesta(no).
-
-% -------------------------------[ Verbos y derivados]-------------------------------
-% >> Verbos
-verbo(LV):- combinacion(LV). % REGLA: verbo(lista) verifica que una lista de verbos que
-                                                  % sean alguna combinacion conocida
-verbo([V]):- conjugado(_,V,_).                                                                                            
-verbo(V):- conjugado(_,V,_). % REGLA: verbo(conjugado) = analiza si un verbo es un conjugado de otro
-
-verbo(haber). % HECHO: verbo(palabra) = es una palabra conocida en forma definitiva
-verbo(comer).
-verbo(estar).
-verbo(tener).
-verbo(necesitar).
-verbo(diagnosticar).
-
-% >> Conjugaciones de verbos
-conjugado(comer, come, na). % HECHO: conjugado(verbo, palabra, terminacion) = es una conjugacion conocida de un verbo
-conjugado(comer, como, na).
-
-conjugado(estar, esta, na).
-
-conjugado(tener, tiene, na).
-conjugado(tener, tienen, na).
-conjugado(tener, tengo, na).
-
-conjugado(haber, han, na).
-conjugado(haber, hay, na).
-
-conjugado(necesitar, necesito, na).
-
-conjugado(diagnosticar, diagnosticado, ado).
-conjugado(diagnosticar, diagnostico, na).
-conjugado(diagnosticar, diagnosticaron, na).
-
-
-% >> Combinaciones verbales
-combinacion([han, X]):- conjugado(_,X,ado).
-
-% >> Auxiliares de verbos
-auxiliar(en). %HECHO: auxiliar(palabra) = es un auxiliar conocido
-auxiliar(de).
