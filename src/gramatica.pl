@@ -1,5 +1,6 @@
 :- module(gramatica, [oracion_valida/1]).
 :- use_module(diccionario).
+:- use_module(misc).
 
 % -------------------------------[ Composicion de oraciones ]-------------------------------
 % >> Sintagmas verbales
