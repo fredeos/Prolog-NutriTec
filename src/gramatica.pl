@@ -5,7 +5,7 @@
 % -------------------------------[ Composicion de oraciones ]-------------------------------
 % >> Sintagmas verbales
 sintagma_verbal([V], Q):- verbo(V, Q).
-sintagma_verbal([V,SN], Q):- verbo(V, Q), sintagma_nominal(SN, Q).
+sintagma_verbal([V,SN], Q):- verbo(V, Q), sintagma_nominal(SN, _).
 
 % >> Sintagmas nominales
 sintagma_nominal([D,N], Q):- determinante(D,G,Q), nombre(N,G,Q). %REGLA:
