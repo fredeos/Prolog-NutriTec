@@ -1,60 +1,64 @@
-:- module(diccionario,[determinante/2, nombre/2, verbo/1]).
+:- module(diccionario,[determinante/3, nombre/3, verbo/2, respuesta/1, auxiliar/1]).
 :- use_module(misc).
 
 % -------------------------------[ Determinates ]-------------------------------
-determinante(el, m). % HECHO: determinante(palabra, genero) = es un determinante conocido clasificado por genero
-determinante(la, f).
-determinante(lo, n).
-determinante(los, m).
-determinante(las, f).
+determinante("el", m, s). % HECHO: determinante(palabra, genero, numero) = es un determinante conocido clasificado por genero y n�mero
+determinante("la", f, s).
+determinante("lo", n, s).
+determinante("los", m, p).
+determinante("las", f, p).
 
 % -------------------------------[ Nombres o sujetos ]-------------------------------
-nombre(hombre, m). % HECHO: nombre(palabra, genero) = es un nombre conocido clasificado por genero
-nombre(manzana, f).
-nombre(casa, f).
-nombre(doctor, m).
+nombre("hombre", m, s). % HECHO: nombre(palabra, genero, numero) = es un nombre conocido clasificado por genero y n�mero
+nombre("manzana", f, s).
+nombre("casa", f, s).
+nombre("doctor", m, s).
+nombre("manzanas", f, p).
+nombre("casas", f, p).
+nombre("doctores", m, p).
 
 % -------------------------------[ Respuestas sencillas ]-------------------------------
-respuesta(si).
-respuesta(no).
+respuesta("si").
+respuesta("no").
 
 % -------------------------------[ Verbos y derivados]-------------------------------
 % >> Verbos
-verbo(LV):- combinacion(LV). % REGLA: verbo(lista) verifica que una lista de verbos que
-                                                  % sean alguna combinacion conocida
-verbo([V]):- conjugado(_,V,_).                                                                                            
-verbo(V):- conjugado(_,V,_). % REGLA: verbo(conjugado) = analiza si un verbo es un conjugado de otro
+verbo(LV, Q):- combinacion(LV, Q). % REGLA: verbo(lista, numero) verifica que una lista de verbos sea alguna combinacion conocida en singular o plural
+verbo([V], Q):- conjugado(_,V,Q,_).
+verbo(V, Q):- conjugado(_,V,Q,_). % REGLA: verbo(conjugado, numero) = analiza si un verbo es un conjugado de otro en singular o plural
 
-verbo(haber). % HECHO: verbo(palabra) = es una palabra conocida en forma definitiva
-verbo(comer).
-verbo(estar).
-verbo(tener).
-verbo(necesitar).
-verbo(diagnosticar).
+verbo("haber", s). % HECHO: verbo(palabra, numero) = es una palabra conocida en forma definitiva y pluralidad
+verbo("haber", p).
+verbo("comer", s).
+verbo("estar", s).
+verbo("tener", s).
+verbo("tener", p).
+verbo("necesitar", s).
+verbo("diagnosticar", s).
 
 % >> Conjugaciones de verbos
-conjugado(comer, come, na). % HECHO: conjugado(verbo, palabra, terminacion) = es una conjugacion conocida de un verbo
-conjugado(comer, como, na).
+conjugado("comer", "come", s, na). % HECHO: conjugado(verbo, palabra, numero, terminacion) = es una conjugacion conocida de un verbo en singular o plural
+conjugado("comer", "como", s, na).
 
-conjugado(estar, esta, na).
+conjugado("estar", "esta", s, na).
 
-conjugado(tener, tiene, na).
-conjugado(tener, tienen, na).
-conjugado(tener, tengo, na).
+conjugado("tener", "tiene", s, na).
+conjugado("tener", "tiene", p, na).
+conjugado("tener", "tienen", p, na).
+conjugado("tener", "tengo", s, na).
 
-conjugado(haber, han, na).
-conjugado(haber, hay, na).
+conjugado("haber", "han", p, na).
+conjugado("haber", "hay", s, na).
 
-conjugado(necesitar, necesito, na).
+conjugado("necesitar", "necesito", s, na).
 
-conjugado(diagnosticar, diagnosticado, ado).
-conjugado(diagnosticar, diagnostico, na).
-conjugado(diagnosticar, diagnosticaron, na).
-
+conjugado("diagnosticar", "diagnosticado", s, ado).
+conjugado("diagnosticar", "diagnostico", s, na).
+conjugado("diagnosticar", "diagnosticaron", p, aron).
 
 % >> Combinaciones verbales
-combinacion([han, X]):- conjugado(_,X,ado).
+combinacion(["han", X], Q):- conjugado(_,X,Q,ado).
 
 % >> Auxiliares de verbos
-auxiliar(en). %HECHO: auxiliar(palabra) = es un auxiliar conocido
-auxiliar(de).
+auxiliar("en"). % HECHO: auxiliar(palabra) = es un auxiliar conocido
+auxiliar("de").
