@@ -5,14 +5,40 @@
 :- dynamic(info_usuario/2).
 :- dynamic(match/1).
 
-% Palabras clave para identificar intenciones
-palabra_clave(saludo, [hola, buenos, dias, tardes, noches]).
-palabra_clave(despedida, [gracias, adios, hasta, luego]).
-palabra_clave(afirmacion, [si, claro, por, supuesto, afirmativo]).
-palabra_clave(negacion, [no, negativo, para, nada]).
-palabra_clave(objetivo, [peso, normal, saludable, estilo, vida, mejorar, salud, perder, adelgazar]).
-palabra_clave(actividad, [ejercicio, deporte, gimnasio, correr, nadar, ciclismo]).
-palabra_clave(pregunta, [que, cual, como, por, que, cuando, donde, quien]).
+% Palabras clave extendidas para identificar intenciones
+palabra_clave(saludo, [hola, buenos, dias, tardes, noches, saludos, que_tal]).
+palabra_clave(despedida, [gracias, adios, hasta, luego, chao, nos_vemos, hasta_pronto]).
+palabra_clave(afirmacion, [si, claro, por_supuesto, afirmativo, efectivamente, correcto, exacto]).
+palabra_clave(negacion, [no, negativo, para_nada, en_absoluto, nunca, jamas]).
+palabra_clave(objetivo, [peso, normal, saludable, estilo, vida, mejorar, salud, perder, adelgazar, bajar, reducir, tonificar, fortalecer]).
+palabra_clave(actividad, [ejercicio, deporte, gimnasio, correr, nadar, ciclismo, caminar, trotar, levantar_pesas, yoga, pilates, zumba, bailar, entrenar]).
+palabra_clave(pregunta, [que, cual, como, por_que, cuando, donde, quien, cuanto, cuanta]).
+
+% Verbos conjugados y en infinitivo
+palabra_clave(verbo, [quiero, deseo, necesito, busco, intento, trato, 
+                      querer, desear, necesitar, buscar, intentar, tratar,
+                      hago, practico, realizo, ejecuto,
+                      hacer, practicar, realizar, ejecutar,
+                      como, bebo, consumo, ingiero,
+                      comer, beber, consumir, ingerir,
+                      diagnosticaron, detectaron, encontraron,
+                      diagnosticar, detectar, encontrar]).
+
+% Enfermedades y condiciones de salud
+palabra_clave(enfermedad, [hipertension, diabetes, colesterol, trigliceridos, obesidad, sobrepeso, 
+                           anemia, osteoporosis, celiaquía, intolerancia_lactosa, hipotiroidismo, 
+                           hipertiroidismo, gastritis, ulcera, reflujo, colon_irritable]).
+
+% Actividades físicas específicas
+palabra_clave(actividad_especifica, [futbol, baloncesto, tenis, voleibol, atletismo, 
+                                     ciclismo, natacion, boxeo, artes_marciales, crossfit, 
+                                     calistenia, senderismo, escalada, remo, spinning]).
+
+% Frecuencias de actividad
+palabra_clave(frecuencia, [diario, diariamente, todos_los_dias,
+                           semanal, semanalmente, cada_semana,
+                           '1_vez', '2_veces', '3_veces', '4_veces', '5_veces',
+                           'una_vez', 'dos_veces', 'tres_veces', 'cuatro_veces', 'cinco_veces']).
 
 % Procesar la entrada del usuario
 procesar_entrada(Entrada) :-
@@ -28,7 +54,7 @@ identificar_intencion(Palabras, Intencion) :-
     ; contiene_palabras_clave(Palabras, pregunta) -> Intencion = pregunta
     ; contiene_palabras_clave(Palabras, objetivo) -> Intencion = objetivo
     ; contiene_palabras_clave(Palabras, actividad) -> Intencion = actividad
-    ; (member(diagnosticado, Palabras); member(hipertension, Palabras)) -> Intencion = padecimiento
+    ; (member(diagnosticado, Palabras); contiene_palabras_clave(Palabras, enfermedad)) -> Intencion = padecimiento
     ; (member(calorias, Palabras); detectar_numero_calorias(Palabras)) -> Intencion = calorias
     ; member(dieta, Palabras) -> Intencion = dieta
     ; (member(no, Palabras), member(gustan, Palabras)) -> Intencion = preferencias
@@ -50,7 +76,7 @@ manejar_intencion(calorias, Palabras) :-
     (detectar_numero_calorias(Palabras) ->
         findall(Num, (member(Palabra, Palabras), atom_number(Palabra, Num)), [Cantidad|_]),
         assertz(match(calorias(Cantidad))),
-        write("NutriTec: Gracias por la información. ¿Cuál es tu nivel de actividad física (inicial, intermedio o avanzado)?"), nl
+        write("NutriTec: Gracias por la información. ¿Qué actividades y con qué frecuencia realizas durante la semana?"), nl
     ;
         write("NutriTec: No he captado una cantidad específica de calorías. ¿Podrías especificar cuántas calorías diarias te gustaría consumir?"), nl
     ).
@@ -64,7 +90,7 @@ manejar_intencion(despedida, _) :-
     throw(fin_de_conversacion).
 
 manejar_intencion(objetivo, _) :-
-    write("NutriTec: Excelente iniciativa. ¿Tienes alguna enfermedad por la que has iniciado este proceso?"), nl.
+    write("NutriTec: Excelente iniciativa. ¿Tienes alguna enfermedad o condición de salud por la que has iniciado este proceso?"), nl.
 
 % Manejar la intención de padecimiento
 manejar_intencion(padecimiento, Palabras) :-
@@ -91,9 +117,12 @@ manejar_intencion(actividad, Palabras) :-
 
 % Identificar nivel de actividad
 identificar_nivel_actividad(Palabras, Nivel) :-
-    (member(inicial, Palabras) ; sub_atom_icl(Palabras, '0-2') ; sub_atom_icl(Palabras, 'una vez') ; sub_atom_icl(Palabras, 'dos veces')) -> Nivel = inicial ;
-    (member(intermedio, Palabras) ; sub_atom_icl(Palabras, '3-4') ; sub_atom_icl(Palabras, 'tres veces') ; sub_atom_icl(Palabras, 'cuatro veces')) -> Nivel = intermedio ;
-    (member(avanzado, Palabras) ; sub_atom_icl(Palabras, '5') ; sub_atom_icl(Palabras, 'cinco') ; sub_atom_icl(Palabras, 'mas')) -> Nivel = avanzado ;
+    (member(inicial, Palabras) ; sub_atom_icl(Palabras, '0-2') ; sub_atom_icl(Palabras, 'una vez') ; sub_atom_icl(Palabras, 'dos veces') ;
+     sub_atom_icl(Palabras, '1 vez') ; sub_atom_icl(Palabras, '2 veces')) -> Nivel = inicial ;
+    (member(intermedio, Palabras) ; sub_atom_icl(Palabras, '3-4') ; sub_atom_icl(Palabras, 'tres veces') ; sub_atom_icl(Palabras, 'cuatro veces') ;
+     sub_atom_icl(Palabras, '3 veces') ; sub_atom_icl(Palabras, '4 veces')) -> Nivel = intermedio ;
+    (member(avanzado, Palabras) ; sub_atom_icl(Palabras, '5') ; sub_atom_icl(Palabras, 'cinco') ; sub_atom_icl(Palabras, 'mas') ;
+     sub_atom_icl(Palabras, 'todos los dias') ; sub_atom_icl(Palabras, 'diario')) -> Nivel = avanzado ;
     Nivel = desconocido.
 
 sub_atom_icl(Palabras, SubAtom) :-
