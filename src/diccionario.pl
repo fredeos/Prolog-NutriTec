@@ -2,7 +2,7 @@
 :- use_module(misc).
 
 % -------------------------------[ Determinates ]-------------------------------
-determinante("el", m, s). % HECHO: determinante(palabra, genero, numero) = es un determinante conocido clasificado por genero y n�mero
+determinante("el", m, s). % HECHO: determinante(palabra, genero, numero) = es un determinante conocido clasificado por genero y numero
 determinante("la", f, s).
 determinante("lo", n, s).
 determinante("los", m, p).
@@ -79,7 +79,7 @@ verbo("controlar", s).
 
 
 % >> Conjugaciones de verbos
-conjugado("comer", "come", s, na). % HECHO: conjugado(verbo, palabra, numero, terminacion) = es una conjugacion conocida de un verbo en singular o plural
+conjugado("comer", come, s, na). % HECHO: conjugado(verbo, palabra, numero, terminacion) = es una conjugacion conocida de un verbo en singular o plural
 conjugado("comer", "como", s, na).
 conjugado("comer", "comen", p, na).
 conjugado("comer", "comemos", p, na).
