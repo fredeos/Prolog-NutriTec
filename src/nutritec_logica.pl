@@ -16,6 +16,8 @@ despedida --> [gracias] | [adios] | [hasta, luego] | [chao].
 % Preguntas comunes
 pregunta --> [que] | [cual] | [como] | [por, que] | [cuando] | [donde] | [quien] | [cuanto] | [cuanta].
 
+respuesta_no --> [no].
+
 % Objetivo: Se añaden más verbos y conjugaciones
 objetivo --> [quiero], verbo_objetivo, sustantivo_objetivo.
 verbo_objetivo --> [perder] | [ganar] | [mantener] | [mejorar] | [reducir] | [aumentar] | [controlar] | [bajar] | [subir] | [eliminar].
@@ -94,12 +96,16 @@ calorias --> [N], {atom(N), atom_number(N, _)}
 procesar_entrada(Entrada) :-
     downcase_atom(Entrada, EntradaLower),
     atomic_list_concat(Palabras, ' ', EntradaLower),
-    (phrase(oracion, Palabras) ->
+    (phrase(respuesta_no, Palabras) ->  % Verificar si la entrada es "no"
+        write("NutriTec: Vamos a la siguiente pregunta."), nl, 
+        evaluar_recomendacion  % Llamar directamente a la evaluación para ver si ya hay suficientes respuestas
+    ; phrase(oracion, Palabras) ->  % Si no es "no", procesar la oración normalmente
         identificar_intencion(Palabras, Intencion),
         manejar_intencion(Intencion, Palabras)
     ;
         write("NutriTec: No entendí bien tu respuesta. ¿Podrías reformularla?"), nl
     ).
+
 
 % Identificar la intención del usuario
 identificar_intencion(Palabras, Intencion) :-
@@ -115,6 +121,8 @@ identificar_intencion(Palabras, Intencion) :-
     ; Intencion = no_entendido
     ).
 
+    
+
 % Manejar la intención del usuario
 manejar_intencion(saludo, _) :-
     write("NutriTec: Hola, encantado de verte mejorar tu estilo de vida. Cuéntame, ¿en qué te puedo ayudar?"), nl.
@@ -126,45 +134,68 @@ manejar_intencion(despedida, _) :-
 manejar_intencion(objetivo, _) :-
     write("NutriTec: Excelente iniciativa. ¿Tienes alguna enfermedad o condición de salud por la que has iniciado este proceso?"), nl.
 
+
+% Manejar la intención para padecimiento
 manejar_intencion(padecimiento, Palabras) :-
-    findall(Padecimiento, (es_padecimiento(Padecimiento), member(Padecimiento, Palabras)), ListaPadecimientos),
-    (ListaPadecimientos \= [] ->
-        ( \+ match(padecimiento(ListaPadecimientos)) -> 
-            assertz(match(padecimiento(ListaPadecimientos)))
-        ; true ),
-        write("NutriTec: Entiendo. ¿Tienes pensado una cantidad específica de calorías diarias por consumir?"), nl
-    ;
-        write("NutriTec: No he identificado un padecimiento específico. ¿Podrías ser más claro sobre tu condición de salud?"), nl
+    (phrase(respuesta_no, Palabras) ->  % Si la respuesta es "no"
+        write("NutriTec: Vamos a la siguiente pregunta."), nl, 
+        evaluar_recomendacion  % Pasar a la siguiente pregunta
+    ; findall(Padecimiento, (es_padecimiento(Padecimiento), member(Padecimiento, Palabras)), ListaPadecimientos),
+      (ListaPadecimientos \= [] ->
+          ( \+ match(padecimiento(ListaPadecimientos)) -> 
+              assertz(match(padecimiento(ListaPadecimientos)))
+          ; true ),
+          write("NutriTec: Entiendo. ¿Tienes pensado una cantidad específica de calorías diarias por consumir?"), nl
+      ;
+          write("NutriTec: No he identificado un padecimiento específico. ¿Podrías ser más claro sobre tu condición de salud?"), nl
+      )
     ).
 
+% Manejar la intención para calorías
 manejar_intencion(calorias, Palabras) :-
-    findall(Num, (member(Palabra, Palabras), atom(Palabra), atom_number(Palabra, Num)), Numeros),
-    (Numeros \= [] ->
-        [Cantidad|_] = Numeros,
-        ( \+ match(calorias(Cantidad)) -> 
-            assertz(match(calorias(Cantidad)))
-        ; true ),
-        write("NutriTec: Gracias por la información. ¿Cuál es tu nivel de actividad física (inicial, intermedio o avanzado)?"), nl
-    ;
-        write("NutriTec: No he captado una cantidad específica de calorías. ¿Podrías especificar cuántas calorías diarias te gustaría consumir?"), nl
+    (phrase(respuesta_no, Palabras) ->  % Si la respuesta es "no"
+        write("NutriTec: Vamos a la siguiente pregunta."), nl, 
+        evaluar_recomendacion  % Pasar a la siguiente pregunta
+    ; findall(Num, (member(Palabra, Palabras), atom(Palabra), atom_number(Palabra, Num)), Numeros),
+      (Numeros \= [] ->
+          [Cantidad|_] = Numeros,
+          ( \+ match(calorias(Cantidad)) -> 
+              assertz(match(calorias(Cantidad)))
+          ; true ),
+          write("NutriTec: Gracias por la información. ¿Cuál es tu nivel de actividad física (inicial, intermedio o avanzado)?"), nl
+      ;
+          write("NutriTec: No he captado una cantidad específica de calorías. ¿Podrías especificar cuántas calorías diarias te gustaría consumir?"), nl
+      )
     ).
 
+% Manejar la intención para actividad
 manejar_intencion(actividad, Palabras) :-
-    (member(Nivel, Palabras), member(Nivel, [inicial, intermedio, avanzado, sedentario, activo, muy_activo])) ->
+    (phrase(respuesta_no, Palabras) ->  % Si la respuesta es "no"
+        write("NutriTec: Vamos a la siguiente pregunta."), nl, 
+        evaluar_recomendacion  % Pasar a la siguiente pregunta
+    ; member(Nivel, Palabras),
+      member(Nivel, [inicial, intermedio, avanzado, sedentario, activo, muy_activo]) ->
         ( \+ match(actividad(Nivel)) -> 
             assertz(match(actividad(Nivel)))
         ; true ),
         write("NutriTec: Gracias por la información sobre tu nivel de actividad. "), nl,
         evaluar_recomendacion
     ;
-        write("NutriTec: Por favor, especifica tu nivel de actividad física como inicial, intermedio o avanzado."), nl.
+        write("NutriTec: Por favor, especifica tu nivel de actividad física como inicial, intermedio o avanzado."), nl
+    ).
 
+% Manejar la intención para preferencias
 manejar_intencion(preferencias, Palabras) :-
-    findall(Alimento, (alimento(Alimento), member(Alimento, Palabras)), AlimentosNoDeseados),
-    ( \+ match(preferencias(AlimentosNoDeseados)) -> 
-        assertz(match(preferencias(AlimentosNoDeseados)))
-    ; true ),
-    evaluar_recomendacion.
+    (phrase(respuesta_no, Palabras) ->  % Si la respuesta es "no"
+        write("NutriTec: Vamos a la siguiente pregunta."), nl, 
+        evaluar_recomendacion  % Pasar a la siguiente pregunta
+    ; findall(Alimento, (alimento(Alimento), member(Alimento, Palabras)), AlimentosNoDeseados),
+      ( \+ match(preferencias(AlimentosNoDeseados)) -> 
+          assertz(match(preferencias(AlimentosNoDeseados)))
+      ; true ),
+      evaluar_recomendacion
+    ).
+
 
 manejar_intencion(dieta, Palabras) :-
     (member(Dieta, Palabras),
@@ -209,19 +240,22 @@ evaluar_recomendacion :-
         write("¿Hay algo más que quieras compartir sobre tus objetivos o preferencias?"), nl
     ).
 
-% Recomendar una dieta basada en los datos del usuario
 recomendar_dieta(Matches) :-
-    member(padecimiento(Padecimientos), Matches),
-    member(calorias(CantidadCalorias), Matches),
-    member(actividad(NivelActividad), Matches),
+    % Revis si hay respuestas para cada  campo 
+    (member(padecimiento(Padecimientos), Matches) -> true ; Padecimientos = []),
+    (member(calorias(CantidadCalorias), Matches) -> true ; CantidadCalorias = 0),
+    (member(actividad(NivelActividad), Matches) -> true ; NivelActividad = none),
     (member(preferencias(AlimentosNoDeseados), Matches) -> true ; AlimentosNoDeseados = []),
     
+    % Encontrar las dietas recomendadas
     findall(Dieta, dieta_recomendada(Dieta, Padecimientos, CantidadCalorias, NivelActividad, AlimentosNoDeseados), DietasRecomendadas),
     
+    % Si hay dietas recomendadas, seleccionar una aleatoriamente
     (DietasRecomendadas \= [] ->
         random_member(DietaSeleccionada, DietasRecomendadas),
         write("NutriTec: Basado en tu información ("), write(Padecimientos), write(", "),
-        write(CantidadCalorias), write(" calorías, nivel de actividad "), write(NivelActividad),
+        (CantidadCalorias > 0 -> write(CantidadCalorias), write(" calorías, ") ; true),
+        (NivelActividad \= none -> write("nivel de actividad "), write(NivelActividad), write(", ") ; true),
         write("), te recomiendo la siguiente dieta: "), nl,
         write(DietaSeleccionada), nl,
         mostrar_comidas(DietaSeleccionada), nl
@@ -230,22 +264,21 @@ recomendar_dieta(Matches) :-
         write("Te sugiero consultar con un nutricionista para un plan más personalizado."), nl
     ).
 
-% Buscar una dieta que coincida con los datos obtenidos
+
 dieta_recomendada(Dieta, Padecimientos, CantidadCalorias, NivelActividad, AlimentosNoDeseados) :-
-    dieta(Dieta, _, CaloriasRecomendadas, PadecimientosRecomendados, PadecimientosNoRecomendados, NivelesActividadRecomendados, _, AlimentosPermitidos),
+    dieta(Dieta, _, CaloriasRecomendadas, PadecimientosRecomendados, PadecimientosNoRecomendados, NivelesActividadRecomendados, Notiene, AlimentosPermitidos),
     
-    % Comparación corregida de padecimientos
-    member(Padecimiento, Padecimientos),
-    member(Padecimiento, PadecimientosRecomendados),
+    % Verificar que el padecimiento esté entre los recomendados, o si no hay padecimiento, pasar
+    (Padecimientos = [] -> true ; member(Padecimiento, Padecimientos), member(Padecimiento, PadecimientosRecomendados)),
     
     \+ (member(Padecimiento, Padecimientos), member(Padecimiento, PadecimientosNoRecomendados)),
     
-    CantidadCalorias =< CaloriasRecomendadas,
-    CantidadCalorias >= CaloriasRecomendadas - 300,  % Permitimos un margen de 300 calorías menos
+    % Verificar que las calorías estén dentro del rango permitido, si es que se especificaron
+    (CantidadCalorias = 0 -> true ; (CantidadCalorias =< CaloriasRecomendadas, CantidadCalorias >= CaloriasRecomendadas - 300)),  % Permitimos un margen de 300 calorías menos
     
-    member(NivelActividad, NivelesActividadRecomendados),
+    (NivelActividad = none -> true ; member(NivelActividad, NivelesActividadRecomendados)),
     
-    \+ (member(AlimentoNoDeseado, AlimentosNoDeseados), member(AlimentoNoDeseado, AlimentosPermitidos)).
+    (AlimentosNoDeseados = [] -> true ; forall(member(AlimentoNoDeseado, AlimentosNoDeseados), member(AlimentoNoDeseado, Notiene))).
 
 % Mostrar las comidas de una dieta
 mostrar_comidas(Dieta) :-
