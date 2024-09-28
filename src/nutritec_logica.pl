@@ -1,6 +1,7 @@
 % -------------------------------[ NutriTec Lógica con BNF ]-------------------------------
 
 :- consult('nutritec_base.pl').
+:- consult('gramatica.pl').
 
 % Variables dinámicas para almacenar la información del usuario y los matches
 :- dynamic(info_usuario/2).
@@ -92,14 +93,28 @@ calorias --> [N], {atom(N), atom_number(N, _)}
 
 % Procesar la entrada del usuario
 procesar_entrada(Entrada) :-
-    downcase_atom(Entrada, EntradaLower),
-    atomic_list_concat(Palabras, ' ', EntradaLower),
-    (phrase(oracion, Palabras) ->
+    string_lower(Entrada,EntradaLower), segmentos(EntradaLower,[Palabras|_]),
+    print(Palabras),
+    ( (phrase(oracion, Palabras); validar_estructura(Palabras)), print('\n oracion entendida') ->
         identificar_intencion(Palabras, Intencion),
         manejar_intencion(Intencion, Palabras)
     ;
         write("NutriTec: No entendí bien tu respuesta. ¿Podrías reformularla?"), nl
     ).
+
+segmentos(S,L):- split_string(S,"."," ",S1), segmentos(S1,[],L).
+segmentos([X|R],L1,L2):- X \== "", split_string(X," ", ",",X1), palabras(X1,P), segmentos(R,[P|L1],L2).
+segmentos([X|R],L1,L2):- X == "", segmentos(R,L1,L2).
+segmentos([],L1,L2):- inversa(L1,L2).
+
+palabras(P,LP):- palabras(P,[],[],LP).
+palabras([X|R],[],L2, LP):- atom_string(Atom,X), atomic_list_concat(X1,',',Atom), palabras(R,X1,L2,LP).
+palabras(R,[X|L1],L2,LP):- X \== '', palabras(R,L1,[X|L2],LP).
+palabras(R,[X|L1],L2,LP):- X == '', palabras(R,L1,L2,LP).
+palabras([],[],L2,LP):- palabras([],L2,LP).
+palabras([],P,LP):- inversa(P,LP).
+
+validar_estructura(X):- descomponer(X,A,[B,C]), oracion_bnf(A,B,C).
 
 % Identificar la intención del usuario
 identificar_intencion(Palabras, Intencion) :-
