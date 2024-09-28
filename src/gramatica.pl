@@ -17,7 +17,7 @@ sintagma_nominal([me], s).
 
 % >>> Oraciones
 % [Validar que una oracion-lista dada sea puede construir con el diccionario conocido]
-oracion_valida(Oracion):- palabras_validas(Oracion), descomponer(Oracion,A,[B,C]), oracion(A,B,C).
+oracion_valida(Oracion):- palabras_validas(Oracion), descomponer(Oracion,A,[B,C]), oracion_bnf(A,B,C).
 
 % [Verificar que las palabras usadas en una oracion sean parte del diccionario conocido]
 palabras_validas([X|R]):- determinante(X,_,_), palabras_validas(R).
