@@ -2,16 +2,16 @@
 :- use_module(misc).
 
 % -------------------------------[ Determinates ]-------------------------------
-determinante("el", m, s). % HECHO: determinante(palabra, genero, numero) = es un determinante conocido clasificado por genero y n�mero
-determinante("la", f, s).
-determinante("lo", n, s).
-determinante("los", m, p).
-determinante("las", f, p).
+determinante(el, m, s). % HECHO: determinante(palabra, genero, numero) = es un determinante conocido clasificado por genero y n�mero
+determinante(la, f, s).
+determinante(lo, n, s).
+determinante(los, m, p).
+determinante(las, f, p).
 
 % -------------------------------[ Nombres o sujetos ]-------------------------------
-nombre("hombre", m, s). % HECHO: nombre(palabra, genero, numero) = es un nombre conocido clasificado por genero y n�mero
-nombre("manzana", f, s).
-nombre("casa", f, s).
+nombre(hombre, m, s). % HECHO: nombre(palabra, genero, numero) = es un nombre conocido clasificado por genero y n�mero
+nombre(manzana, f, s).
+nombre(casa, f, s).
 nombre("doctor", m, s).
 nombre("manzanas", f, p).
 nombre("casas", f, p).
@@ -37,7 +37,7 @@ verbo("necesitar", s).
 verbo("diagnosticar", s).
 
 % >> Conjugaciones de verbos
-conjugado("comer", "come", s, na). % HECHO: conjugado(verbo, palabra, numero, terminacion) = es una conjugacion conocida de un verbo en singular o plural
+conjugado("comer", come, s, na). % HECHO: conjugado(verbo, palabra, numero, terminacion) = es una conjugacion conocida de un verbo en singular o plural
 conjugado("comer", "como", s, na).
 
 conjugado("estar", "esta", s, na).

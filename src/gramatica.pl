@@ -11,8 +11,8 @@ sintagma_verbal([V,SN], Q):- verbo(V, Q), sintagma_nominal(SN, _).
 sintagma_nominal([D,N], Q):- determinante(D,G,Q), nombre(N,G,Q). %REGLA:
 
 % Sintagmas particulares
-sintagma_nominal(["yo"], s). % HECHO: sintagma_nominal(palabra, numero) = indica una palabra unica que funciona como sintagma nominal
-sintagma_nominal(["me"], s).
+sintagma_nominal([yo], s). % HECHO: sintagma_nominal(palabra, numero) = indica una palabra unica que funciona como sintagma nominal
+sintagma_nominal([me], s).
 
 % >>> Oraciones
 % [Validar que una oracion-lista dada sea puede construir con el diccionario conocido]
