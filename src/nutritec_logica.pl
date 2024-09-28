@@ -1,84 +1,118 @@
-% -------------------------------[ NutriTec Lógica ]-------------------------------
+% -------------------------------[ NutriTec Lógica con BNF ]-------------------------------
+
 :- consult('nutritec_base.pl').
 
 % Variables dinámicas para almacenar la información del usuario y los matches
 :- dynamic(info_usuario/2).
 :- dynamic(match/1).
 
-% Palabras clave extendidas para identificar intenciones
-palabra_clave(saludo, [hola, buenos, dias, tardes, noches, saludos, que_tal]).
-palabra_clave(despedida, [gracias, adios, hasta, luego, chao, nos_vemos, hasta_pronto]).
-palabra_clave(afirmacion, [si, claro, por_supuesto, afirmativo, efectivamente, correcto, exacto]).
-palabra_clave(negacion, [no, negativo, para_nada, en_absoluto, nunca, jamas]).
-palabra_clave(objetivo, [peso, normal, saludable, estilo, vida, mejorar, salud, perder, adelgazar, bajar, reducir, tonificar, fortalecer]).
-palabra_clave(actividad, [ejercicio, deporte, gimnasio, correr, nadar, ciclismo, caminar, trotar, levantar_pesas, yoga, pilates, zumba, bailar, entrenar]).
-palabra_clave(pregunta, [que, cual, como, por_que, cuando, donde, quien, cuanto, cuanta]).
+% Definición de la gramática BNF actualizada
+oracion --> saludo | despedida | pregunta | objetivo | actividad | padecimiento | preferencia | dieta | calorias.
 
-% Verbos conjugados y en infinitivo
-palabra_clave(verbo, [quiero, deseo, necesito, busco, intento, trato, 
-                      querer, desear, necesitar, buscar, intentar, tratar,
-                      hago, practico, realizo, ejecuto,
-                      hacer, practicar, realizar, ejecutar,
-                      como, bebo, consumo, ingiero,
-                      comer, beber, consumir, ingerir,
-                      diagnosticaron, detectaron, encontraron,
-                      diagnosticar, detectar, encontrar]).
+% Saludos y despedidas
+saludo --> [hola] | [buenos, dias] | [buenas, tardes] | [buenas, noches].
+despedida --> [gracias] | [adios] | [hasta, luego] | [chao].
 
-% Enfermedades y condiciones de salud
-palabra_clave(enfermedad, [hipertension, diabetes, colesterol, trigliceridos, obesidad, sobrepeso, 
-                           anemia, osteoporosis, celiaquía, intolerancia_lactosa, hipotiroidismo, 
-                           hipertiroidismo, gastritis, ulcera, reflujo, colon_irritable]).
+% Preguntas comunes
+pregunta --> [que] | [cual] | [como] | [por, que] | [cuando] | [donde] | [quien] | [cuanto] | [cuanta].
 
-% Actividades físicas específicas
-palabra_clave(actividad_especifica, [futbol, baloncesto, tenis, voleibol, atletismo, 
-                                     ciclismo, natacion, boxeo, artes_marciales, crossfit, 
-                                     calistenia, senderismo, escalada, remo, spinning]).
+% Objetivo: Se añaden más verbos y conjugaciones
+objetivo --> [quiero], verbo_objetivo, sustantivo_objetivo.
+verbo_objetivo --> [perder] | [ganar] | [mantener] | [mejorar] | [reducir] | [aumentar] | [controlar] | [bajar] | [subir] | [eliminar].
+sustantivo_objetivo --> [peso] | [salud] | [masa, muscular] | [grasa] | [colesterol] | [azucar].
 
-% Frecuencias de actividad
-palabra_clave(frecuencia, [diario, diariamente, todos_los_dias,
-                           semanal, semanalmente, cada_semana,
-                           '1_vez', '2_veces', '3_veces', '4_veces', '5_veces',
-                           'una_vez', 'dos_veces', 'tres_veces', 'cuatro_veces', 'cinco_veces']).
+% Actividad: Añadiendo más opciones
+actividad --> nivel_actividad.
+nivel_actividad --> [inicial] | [intermedio] | [avanzado] | [sedentario] | [activo] | [muy, activo].
+
+% Padecimiento: Expansión de las formas de identificar enfermedades o condiciones
+padecimiento --> [tengo], enfermedad
+             | [me, diagnosticaron], enfermedad
+             | [padezco], enfermedad
+             | [sufro, de], enfermedad
+             | [mi, medico, dice, que, tengo], enfermedad
+             | [me, han, detectado], enfermedad
+             | [fui, diagnosticado], enfermedad
+             | [he, sido, diagnosticado, con], enfermedad
+             | [estoy, en, tratamiento, por], enfermedad.
+
+% Enfermedades comunes
+enfermedad --> [hipertension] 
+            | [diabetes] 
+            | [colesterol, alto] 
+            | [trigliceridos, altos] 
+            | [obesidad] 
+            | [anemia] 
+            | [intolerancia, a, la, lactosa] 
+            | [enfermedad, celiaca] 
+            | [epilepsia] 
+            | [sindrome, metabolico] 
+            | [hipotiroidismo] 
+            | [hipertiroidismo] 
+            | [enfermedad, cardiovascular] 
+            | [gota] 
+            | [dislipidemia] 
+            | [enfermedad, cronica].
+
+% Preferencias alimentarias (expandido)
+preferencia --> [no, me, gusta], alimento 
+             | [prefiero, no, comer], alimento 
+             | [soy, alergico, a], alimento 
+             | [no, puedo, comer], alimento 
+             | [evito], alimento.
+
+% Alimentos comunes
+alimento --> [carne] 
+           | [pescado] 
+           | [lacteos] 
+           | [gluten] 
+           | [frutos, secos] 
+           | [mariscos] 
+           | [huevos] 
+           | [soja] 
+           | [verduras] 
+           | [frutas] 
+           | [legumbres].
+
+% Dietas
+dieta --> [quiero, una, dieta], tipo_dieta.
+tipo_dieta --> [keto] 
+             | [proteica] 
+             | [vegetariana] 
+             | [vegana] 
+             | [alcalina] 
+             | [baja, en, grasas] 
+             | [mediterranea] 
+             | [paleo].
+
+% Calorías
+calorias --> [N], {atom(N), atom_number(N, _)} 
+           | [N, calorias], {atom(N), atom_number(N, _)} 
+           | [quiero, consumir], [N], [calorias], {atom(N), atom_number(N, _)}.
 
 % Procesar la entrada del usuario
 procesar_entrada(Entrada) :-
     downcase_atom(Entrada, EntradaLower),
     atomic_list_concat(Palabras, ' ', EntradaLower),
-    identificar_intencion(Palabras, Intencion),
-    manejar_intencion(Intencion, Palabras).
+    (phrase(oracion, Palabras) ->
+        identificar_intencion(Palabras, Intencion),
+        manejar_intencion(Intencion, Palabras)
+    ;
+        write("NutriTec: No entendí bien tu respuesta. ¿Podrías reformularla?"), nl
+    ).
 
 % Identificar la intención del usuario
 identificar_intencion(Palabras, Intencion) :-
-    (contiene_palabras_clave(Palabras, saludo) -> Intencion = saludo
-    ; contiene_palabras_clave(Palabras, despedida) -> Intencion = despedida
-    ; contiene_palabras_clave(Palabras, pregunta) -> Intencion = pregunta
-    ; contiene_palabras_clave(Palabras, objetivo) -> Intencion = objetivo
-    ; contiene_palabras_clave(Palabras, actividad) -> Intencion = actividad
-    ; (member(diagnosticado, Palabras); contiene_palabras_clave(Palabras, enfermedad)) -> Intencion = padecimiento
-    ; (member(calorias, Palabras); detectar_numero_calorias(Palabras)) -> Intencion = calorias
-    ; member(dieta, Palabras) -> Intencion = dieta
-    ; (member(no, Palabras), member(gustan, Palabras)) -> Intencion = preferencias
+    (phrase(saludo, Palabras) -> Intencion = saludo
+    ; phrase(despedida, Palabras) -> Intencion = despedida
+    ; phrase(pregunta, Palabras) -> Intencion = pregunta
+    ; phrase(objetivo, Palabras) -> Intencion = objetivo
+    ; phrase(actividad, Palabras) -> Intencion = actividad
+    ; phrase(padecimiento, Palabras) -> Intencion = padecimiento
+    ; phrase(preferencia, Palabras) -> Intencion = preferencias
+    ; phrase(dieta, Palabras) -> Intencion = dieta
+    ; phrase(calorias, Palabras) -> Intencion = calorias
     ; Intencion = no_entendido
-    ).
-
-contiene_palabras_clave(Palabras, Tipo) :-
-    palabra_clave(Tipo, PalabrasClave),
-    intersection(Palabras, PalabrasClave, Comunes),
-    Comunes \= [].
-
-% Detectar calorías como número y palabra clave
-detectar_numero_calorias(Palabras) :-
-    member(Palabra, Palabras),
-    atom_number(Palabra, _).
-
-% Manejar la intención de calorías
-manejar_intencion(calorias, Palabras) :-
-    (detectar_numero_calorias(Palabras) ->
-        findall(Num, (member(Palabra, Palabras), atom_number(Palabra, Num)), [Cantidad|_]),
-        assertz(match(calorias(Cantidad))),
-        write("NutriTec: Gracias por la información. ¿Qué actividades y con qué frecuencia realizas durante la semana?"), nl
-    ;
-        write("NutriTec: No he captado una cantidad específica de calorías. ¿Podrías especificar cuántas calorías diarias te gustaría consumir?"), nl
     ).
 
 % Manejar la intención del usuario
@@ -92,61 +126,77 @@ manejar_intencion(despedida, _) :-
 manejar_intencion(objetivo, _) :-
     write("NutriTec: Excelente iniciativa. ¿Tienes alguna enfermedad o condición de salud por la que has iniciado este proceso?"), nl.
 
-% Manejar la intención de padecimiento
 manejar_intencion(padecimiento, Palabras) :-
-    findall(Padecimiento, (padecimiento(Padecimiento, _, _), member(Padecimiento, Palabras)), ListaPadecimientos),
+    findall(Padecimiento, (es_padecimiento(Padecimiento), member(Padecimiento, Palabras)), ListaPadecimientos),
     (ListaPadecimientos \= [] ->
-        assertz(match(padecimiento(ListaPadecimientos))),
+        ( \+ match(padecimiento(ListaPadecimientos)) -> 
+            assertz(match(padecimiento(ListaPadecimientos)))
+        ; true ),
         write("NutriTec: Entiendo. ¿Tienes pensado una cantidad específica de calorías diarias por consumir?"), nl
     ;
         write("NutriTec: No he identificado un padecimiento específico. ¿Podrías ser más claro sobre tu condición de salud?"), nl
     ).
 
-% Manejar la intención de actividad
+manejar_intencion(calorias, Palabras) :-
+    findall(Num, (member(Palabra, Palabras), atom(Palabra), atom_number(Palabra, Num)), Numeros),
+    (Numeros \= [] ->
+        [Cantidad|_] = Numeros,
+        ( \+ match(calorias(Cantidad)) -> 
+            assertz(match(calorias(Cantidad)))
+        ; true ),
+        write("NutriTec: Gracias por la información. ¿Cuál es tu nivel de actividad física (inicial, intermedio o avanzado)?"), nl
+    ;
+        write("NutriTec: No he captado una cantidad específica de calorías. ¿Podrías especificar cuántas calorías diarias te gustaría consumir?"), nl
+    ).
+
 manejar_intencion(actividad, Palabras) :-
-    identificar_nivel_actividad(Palabras, Nivel),
-    (Nivel \= desconocido -> 
-        assertz(match(actividad(Nivel))),
+    (member(Nivel, Palabras), member(Nivel, [inicial, intermedio, avanzado, sedentario, activo, muy_activo])) ->
+        ( \+ match(actividad(Nivel)) -> 
+            assertz(match(actividad(Nivel)))
+        ; true ),
         write("NutriTec: Gracias por la información sobre tu nivel de actividad. "), nl,
         evaluar_recomendacion
     ;
-        write("NutriTec: No he entendido bien tu nivel de actividad física. "), nl,
-        write("Por favor, especifica si es inicial (0-2 veces por semana), "), nl,
-        write("intermedio (3-4 veces por semana) o avanzado (5 o más veces por semana)."), nl
-    ).
+        write("NutriTec: Por favor, especifica tu nivel de actividad física como inicial, intermedio o avanzado."), nl.
 
-% Identificar nivel de actividad
-identificar_nivel_actividad(Palabras, Nivel) :-
-    (member(inicial, Palabras) ; sub_atom_icl(Palabras, '0-2') ; sub_atom_icl(Palabras, 'una vez') ; sub_atom_icl(Palabras, 'dos veces') ;
-     sub_atom_icl(Palabras, '1 vez') ; sub_atom_icl(Palabras, '2 veces')) -> Nivel = inicial ;
-    (member(intermedio, Palabras) ; sub_atom_icl(Palabras, '3-4') ; sub_atom_icl(Palabras, 'tres veces') ; sub_atom_icl(Palabras, 'cuatro veces') ;
-     sub_atom_icl(Palabras, '3 veces') ; sub_atom_icl(Palabras, '4 veces')) -> Nivel = intermedio ;
-    (member(avanzado, Palabras) ; sub_atom_icl(Palabras, '5') ; sub_atom_icl(Palabras, 'cinco') ; sub_atom_icl(Palabras, 'mas') ;
-     sub_atom_icl(Palabras, 'todos los dias') ; sub_atom_icl(Palabras, 'diario')) -> Nivel = avanzado ;
-    Nivel = desconocido.
+manejar_intencion(preferencias, Palabras) :-
+    findall(Alimento, (alimento(Alimento), member(Alimento, Palabras)), AlimentosNoDeseados),
+    ( \+ match(preferencias(AlimentosNoDeseados)) -> 
+        assertz(match(preferencias(AlimentosNoDeseados)))
+    ; true ),
+    evaluar_recomendacion.
 
-sub_atom_icl(Palabras, SubAtom) :-
-    atomic_list_concat(Palabras, ' ', Atom),
-    sub_atom(Atom, _, _, _, SubAtom).
-
-% Manejar la intención de dieta
 manejar_intencion(dieta, Palabras) :-
     (member(Dieta, Palabras),
      tipo_dieta(Dieta) ->
-        assertz(match(dieta(Dieta))),
+        ( \+ match(dieta(Dieta)) -> 
+            assertz(match(dieta(Dieta)))
+        ; true ),
         evaluar_recomendacion
     ;
         write("NutriTec: No he identificado un tipo de dieta específico. ¿Podrías mencionar qué tipo de dieta te interesa?"), nl
     ).
 
-% Manejar la intención de preferencias alimentarias
-manejar_intencion(preferencias, Palabras) :-
-    findall(Alimento, (alimento(Alimento), member(Alimento, Palabras)), AlimentosNoDeseados),
-    assertz(match(preferencias(AlimentosNoDeseados))),
-    evaluar_recomendacion.
-
 manejar_intencion(no_entendido, _) :-
     write("NutriTec: No entendí bien tu respuesta. ¿Podrías reformularla?"), nl.
+
+% Funciones auxiliares
+es_padecimiento(hipertension).
+es_padecimiento(diabetes).
+es_padecimiento(colesterol_alto).
+es_padecimiento(trigliceridos_altos).
+es_padecimiento(obesidad).
+es_padecimiento(anemia).
+es_padecimiento(intolerancia_a_la_lactosa).
+es_padecimiento(enfermedad_celiaca).
+es_padecimiento(epilepsia).
+es_padecimiento(sindrome_metabolico).
+es_padecimiento(hipotiroidismo).
+es_padecimiento(hipertiroidismo).
+es_padecimiento(enfermedad_cardiovascular).
+es_padecimiento(gota).
+es_padecimiento(dislipidemia).
+es_padecimiento(enfermedad_cronica).
 
 % Evaluar si hay suficiente información para una recomendación
 evaluar_recomendacion :-
@@ -184,8 +234,9 @@ recomendar_dieta(Matches) :-
 dieta_recomendada(Dieta, Padecimientos, CantidadCalorias, NivelActividad, AlimentosNoDeseados) :-
     dieta(Dieta, _, CaloriasRecomendadas, PadecimientosRecomendados, PadecimientosNoRecomendados, NivelesActividadRecomendados, _, AlimentosPermitidos),
     
-    intersection(Padecimientos, PadecimientosRecomendados, PadecimientosComunes),
-    PadecimientosComunes \= [],
+    % Comparación corregida de padecimientos
+    member(Padecimiento, Padecimientos),
+    member(Padecimiento, PadecimientosRecomendados),
     
     \+ (member(Padecimiento, Padecimientos), member(Padecimiento, PadecimientosNoRecomendados)),
     
