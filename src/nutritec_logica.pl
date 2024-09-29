@@ -1,6 +1,7 @@
 % -------------------------------[ NutriTec Lógica con BNF ]-------------------------------
 
 :- consult('nutritec_base.pl').
+:- consult('gramatica.pl').
 
 % Variables dinámicas para almacenar la información del usuario y los matches
 :- dynamic(info_usuario/2).
@@ -17,6 +18,7 @@ despedida --> [gracias] | [adios] | [hasta, luego] | [chao].
 pregunta --> [que] | [cual] | [como] | [por, que] | [cuando] | [donde] | [quien] | [cuanto] | [cuanta].
 
 respuesta_no --> [no].
+
 
 % Objetivo: Se añaden más verbos y conjugaciones
 objetivo --> [quiero], verbo_objetivo, sustantivo_objetivo.
@@ -107,6 +109,18 @@ procesar_entrada(Entrada) :-
     ).
 
 
+segmentos(S,L):- split_string(S,"."," ",S1), segmentos(S1,[],L).
+segmentos([X|R],L1,L2):- X \== "", split_string(X," ", ",",X1), palabras(X1,P), segmentos(R,[P|L1],L2).
+segmentos([X|R],L1,L2):- X == "", segmentos(R,L1,L2).
+segmentos([],L1,L2):- inversa(L1,L2).
+
+palabras(P,LP):- palabras(P,[],[],LP).
+palabras([X|R],[],L2, LP):- atom_string(Atom,X), atomic_list_concat(X1,',',Atom), palabras(R,X1,L2,LP).
+palabras(R,[X|L1],L2,LP):- X \== '', palabras(R,L1,[X|L2],LP).
+palabras(R,[X|L1],L2,LP):- X == '', palabras(R,L1,L2,LP).
+palabras([],[],L2,LP):- palabras([],L2,LP).
+palabras([],P,LP):- inversa(P,LP).
+
 % Identificar la intención del usuario
 identificar_intencion(Palabras, Intencion) :-
     (phrase(saludo, Palabras) -> Intencion = saludo
@@ -121,8 +135,6 @@ identificar_intencion(Palabras, Intencion) :-
     ; Intencion = no_entendido
     ).
 
-    
-
 % Manejar la intención del usuario
 manejar_intencion(saludo, _) :-
     write("NutriTec: Hola, encantado de verte mejorar tu estilo de vida. Cuéntame, ¿en qué te puedo ayudar?"), nl.
@@ -133,7 +145,6 @@ manejar_intencion(despedida, _) :-
 
 manejar_intencion(objetivo, _) :-
     write("NutriTec: Excelente iniciativa. ¿Tienes alguna enfermedad o condición de salud por la que has iniciado este proceso?"), nl.
-
 
 % Manejar la intención para padecimiento
 manejar_intencion(padecimiento, Palabras) :-
@@ -207,6 +218,9 @@ manejar_intencion(dieta, Palabras) :-
     ;
         write("NutriTec: No he identificado un tipo de dieta específico. ¿Podrías mencionar qué tipo de dieta te interesa?"), nl
     ).
+
+manejar_intencion(no_entendido, _) :-
+    write("NutriTec: No entendí bien tu respuesta. ¿Podrías reformularla?"), nl.
 
 manejar_intencion(no_entendido, _) :-
     write("NutriTec: No entendí bien tu respuesta. ¿Podrías reformularla?"), nl.
@@ -285,7 +299,6 @@ mostrar_comidas(Dieta) :-
     dieta(Dieta, _, _, _, _, _, _, Comidas),
     write("Las comidas de esta dieta son:"), nl,
     forall(member(Comida, Comidas), (write("- "), write(Comida), nl)).
-
 % Leer entrada del usuario
 leer_entrada :- 
     write("Usuario: "),
