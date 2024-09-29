@@ -107,8 +107,7 @@ calorias --> [N], {atom(N), atom_number(N, _)}
 
 % Procesar la entrada del usuario.
 procesar_entrada(Entrada) :-
-    downcase_atom(Entrada, EntradaLower),  % Convierte la entrada a minúsculas.
-    atomic_list_concat(Palabras, ' ', EntradaLower),  % Divide la entrada en palabras.
+    string_lower(Entrada,EntradaLower), segmentos(EntradaLower,[Palabras|_]), % Convierte la entrada a minúsculas y la divide en palabras.
     (phrase(respuesta_no, Palabras) ->  % Verifica si la entrada es "no".
         write("NutriTec: Vamos a la siguiente pregunta."), nl, 
         evaluar_recomendacion  % Llama a la evaluación para ver si ya hay suficientes respuestas.
@@ -132,7 +131,7 @@ palabras(R,[X|L1],L2,LP):- X == '', palabras(R,L1,L2,LP).
 palabras([],[],L2,LP):- palabras([],L2,LP).
 palabras([],P,LP):- inversa(P,LP).
 
-% Identificar la intención del usuario.
+% Identificar la intención del usuario
 identificar_intencion(Palabras, Intencion) :-
     (phrase(saludo, Palabras) -> Intencion = saludo
     ; phrase(despedida, Palabras) -> Intencion = despedida
