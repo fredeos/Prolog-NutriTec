@@ -57,12 +57,12 @@ alimento(sal).
 % Dietas recomendadas
 % dieta(Nombre, TipoDieta, Calorias, PadecimientosRecomendados, PadecimientosNoRecomendados, ActividadesRecomendadas, ActividadesNoRecomendadas, Comidas).
 
-dieta(baja_en_grasas_1, baja_en_grasas, 1800, [sobrepeso, dislipidemia, hipertension, gota, colesterol_alto, trigliceridos_altos, enfermedad_renal, hipotiroidismo], [desnutricion], [inicial, intermedio], [avanzado],
+dieta(baja_en_grasas_1, baja_en_grasas, 1800, [sobrepeso, dislipidemia, hipertension, gota, colesterol_alto, trigliceridos_altos, enfermedad_renal, hipotiroidismo], [desnutricion], [inicial, intermedio], [huevos],
       ["Desayuno: 1/2 taza de avena con leche descremada y frutas",
        "Almuerzo: Ensalada de pollo a la plancha con verduras variadas",
        "Cena: Pescado al horno con vegetales al vapor y una pequeña porción de arroz integral"]).
 
-dieta(proteica_1, proteica, 2200, [desnutricion, anemia, fibrosis_quistica, sobrepeso], [hipercolesterolemia], [intermedio, avanzado], [inicial],
+dieta(proteica_1, proteica, 2200, [desnutricion, anemia, fibrosis_quistica, sobrepeso], [hipercolesterolemia], [intermedio, avanzado], [mariscos],
       ["Desayuno: Batido de proteínas con plátano y espinacas",
        "Almuerzo: Pechuga de pollo a la parrilla con quinoa y brócoli",
        "Cena: Salmón a la plancha con ensalada mixta y aguacate"]).
